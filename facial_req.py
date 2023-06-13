@@ -10,7 +10,7 @@ import time
 import cv2
 
 #Initialize 'currentname' to trigger only when a new person is identified.
-currentname = "unknown"
+currentname = "Lana"
 #Determine faces from encodings.pickle file model created from train_model.py
 encodingsP = "encodings.pickle"
 
