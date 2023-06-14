@@ -15,7 +15,6 @@ from datetime import datetime
 
 
 class FacialRecognition(QThread):
-    update_names = pyqtSignal(str, int, int)
     update_frame = pyqtSignal(QImage)
 
     def __init__(self, parent=None):
