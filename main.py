@@ -29,7 +29,7 @@ class Window(QMainWindow):
 
         # Create a label for the display camera
         self.label = QLabel(self)
-        self.label.setFixedSize(580, 420)
+        self.label.setFixedSize(420, 420)
 
         self.button_settings = IconPushButton("settings", "settings")
         self.button_unlock = IconPushButton("unlock", "unlock")
@@ -50,14 +50,15 @@ class Window(QMainWindow):
 
         # FIXME integrate these two, camera can't be used by two threads
         # Thread in charge of updating the image
-        self.th = Thread(self)
-        self.th.finished.connect(self.close)
-        self.th.updateFrame.connect(self.set_image)
+        # self.th = Thread(self)
+        # self.th.finished.connect(self.close)
+        # self.th.updateFrame.connect(self.set_image)
 
         # Facial recognition
         self.facial_recognition = FacialRecognition(self)
         self.facial_recognition.finished.connect(self.close)
         self.facial_recognition.update_names.connect(self.set_name)
+        self.facial_recognition.update_frame.connect(self.set_image)
 
         # Buttons layout 1
         buttons_layout = QHBoxLayout()
@@ -93,10 +94,10 @@ class Window(QMainWindow):
         print("Finishing...")
         self.button2.setEnabled(False)
         self.button1.setEnabled(True)
-        self.th.cap.release()
+        # self.th.cap.release()
         cv2.destroyAllWindows()
         self.status = False
-        self.th.terminate()
+        # self.th.terminate()
         # Give time for the thread to finish
         time.sleep(1)
 
@@ -105,7 +106,7 @@ class Window(QMainWindow):
         print("Starting...")
         self.button2.setEnabled(True)
         self.button1.setEnabled(False)
-        self.th.start()
+        # self.th.start()
         self.facial_recognition.start()
 
     @pyqtSlot(QImage)

@@ -1,5 +1,8 @@
 #! /usr/bin/python
+import sys
+
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
+from PyQt5.QtGui import QImage
 # import the necessary packages
 from imutils.video import VideoStream
 from imutils.video import FPS
@@ -20,6 +23,7 @@ from datetime import datetime
 
 class FacialRecognition(QThread):
     update_names = pyqtSignal(str, int, int)
+    update_frame = pyqtSignal(QImage)
 
     def __init__(self, parent=None):
         QThread.__init__(self, parent)
@@ -183,31 +187,41 @@ class FacialRecognition(QThread):
         # loop over frames from the video file stream
         while self.status:
             self.BUTTON_DOOR.when_pressed = self.door_open
-        self.BUTTON_DOOR.when_released = self.door_closed
-        if not self.BELL_PRESSED:
-            self.BUTTON_BELL.when_released = self.bell_on
+            self.BUTTON_DOOR.when_released = self.door_closed
+            if not self.BELL_PRESSED:
+                self.BUTTON_BELL.when_released = self.bell_on
 
-        # conditions to indicate door re-lock
-        if not self.last_unlock is None:
-            time_diff = datetime.now() - self.last_unlock
-            if time_diff.total_seconds() >= self.WAIT_SECONDS:
-                print("JESI NA BRODU ROĐEN ZATVARAJ VRATA ALO")
+            # conditions to indicate door re-lock
+            if not self.last_unlock is None:
+                time_diff = datetime.now() - self.last_unlock
+                if time_diff.total_seconds() >= self.WAIT_SECONDS:
+                    print("JESI NA BRODU ROĐEN ZATVARAJ VRATA ALO")
 
-        # bell timeout
-        if self.BELL_PRESSED and not self.last_bell is None:
-            time_diff = datetime.now() - self.last_bell
-            if time_diff.total_seconds() >= self.BELL_SECONDS:
-                self.bell_off()
+            # bell timeout
+            if self.BELL_PRESSED and not self.last_bell is None:
+                time_diff = datetime.now() - self.last_bell
+                if time_diff.total_seconds() >= self.BELL_SECONDS:
+                    self.bell_off()
 
-        # grab the frame from the threaded video stream and resize it
-        # to 500px (to speedup processing)
-        self.frame = self.vs.read()
-        self.frame = imutils.resize(self.frame, width=400)
+            # grab the frame from the threaded video stream and resize it
+            # to 500px (to speedup processing)
+            self.frame = self.vs.read()
+            self.frame = imutils.resize(self.frame, width=420)
 
-        if self.BELL_PRESSED is True:
-            names, boxes = self.facial_recognition() or (None, None)
-            if names is not None and boxes is not None:
-                self.set_box_names(boxes, names)
+            if self.BELL_PRESSED is True:
+                names, boxes = self.facial_recognition() or (None, None)
+                if names is not None and boxes is not None:
+                    self.set_box_names(boxes, names)
+
+            # print(type(self.frame))
+            # print(type(self.frame.data))
+            # print(self.frame)
+            height, width, channel = self.frame.shape
+            bytes_per_line = channel * width
+            img = QImage(self.frame.data, width, height, bytes_per_line, QImage.Format_BGR888)
+            self.update_frame.emit(img)
+
+        sys.exit(-1)
 
     #     # display the image to our screen
     #     cv2.imshow("Camera stream", self.frame)
