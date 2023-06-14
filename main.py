@@ -1,18 +1,20 @@
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QLabel, QMainWindow, QPushButton, QSizePolicy, QVBoxLayout, \
     QWidget
-from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, pyqtSlot, QSize
+from PyQt5.QtGui import QImage, QPixmap, QPainter, QFont, QColor
+from PyQt5.QtCore import Qt, QThread, pyqtSignal, pyqtSlot, QSize, QPoint
 
 import sys
 import time
 import cv2
 import os
 
+from facial_req import FacialRecognition
 from util.thread import Thread
 from widgets.IconPushButton import IconPushButton
 
 
 class Window(QMainWindow):
+
     def __init__(self):
         super().__init__()
         # Title and dimensions
@@ -46,10 +48,16 @@ class Window(QMainWindow):
         top_layout.addWidget(self.label)
         top_layout.addLayout(extra_buttons_layout)
 
+        # FIXME integrate these two, camera can't be used by two threads
         # Thread in charge of updating the image
         self.th = Thread(self)
         self.th.finished.connect(self.close)
         self.th.updateFrame.connect(self.set_image)
+
+        # Facial recognition
+        self.facial_recognition = FacialRecognition(self)
+        self.facial_recognition.finished.connect(self.close)
+        self.facial_recognition.update_names.connect(self.set_name)
 
         # Buttons layout 1
         buttons_layout = QHBoxLayout()
@@ -98,14 +106,41 @@ class Window(QMainWindow):
         self.button2.setEnabled(True)
         self.button1.setEnabled(False)
         self.th.start()
+        self.facial_recognition.start()
 
     @pyqtSlot(QImage)
     def set_image(self, image):
         self.label.setPixmap(QPixmap.fromImage(image))
+
+    @pyqtSlot(str, int, int)
+    def set_name(self, name, left, y):
+        print(name, left, y)
+        pixmap = self.label.pixmap()  # Get the current pixmap from the label
+        painter = QPainter(pixmap)  # Create a QPainter object for drawing on the pixmap
+
+        # Set the font and color for the text
+        font = QFont("Arial", 12)
+        color = QColor(0, 255, 255)  # Cyan color
+
+        # Set the position to draw the text
+        position = QPoint(left, y)
+
+        # Draw the text on the pixmap
+        painter.setFont(font)
+        painter.setPen(color)
+        painter.drawText(position, name)
+
+        painter.end()  # Finish drawing
+
+        self.label.setPixmap(pixmap)  # Set the updated pixmap to the label
+
+        print(name, left, y)
+        # cv2.putText(self.frame, name, (left, y), cv2.FONT_HERSHEY_SIMPLEX,
+        #             .8, (0, 255, 255), 2)
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     w = Window()
     w.show()
-    sys.exit(app.exec())
+    sys.exit(app.exec_())
