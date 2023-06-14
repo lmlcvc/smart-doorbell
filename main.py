@@ -1,19 +1,14 @@
-# Copyright (C) 2022 The Qt Company Ltd.
-# SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+from PyQt5.QtWidgets import QApplication, QHBoxLayout, QLabel, QMainWindow, QPushButton, QSizePolicy, QVBoxLayout, \
+    QWidget
+from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtCore import Qt, QThread, pyqtSignal, pyqtSlot, QSize
 
-import os
 import sys
 import time
 import cv2
+import os
 
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, pyqtSlot
-from PyQt5.QtGui import QImage, QKeySequence, QPixmap  # , QAction
-from PyQt5.QtWidgets import (QApplication,
-                             QHBoxLayout, QLabel, QMainWindow, QPushButton,
-                             QSizePolicy, QVBoxLayout, QWidget)
-
-"""This example uses the video from a  webcam to apply pattern
-detection from the OpenCV module. e.g.: face, eyes, body, etc."""
+from widgets.IconPushButton import IconPushButton
 
 
 class Thread(QThread):
@@ -64,29 +59,41 @@ class Window(QMainWindow):
         super().__init__()
         # Title and dimensions
         self.setWindowTitle("Patterns detection")
-        self.setGeometry(0, 0, 800, 500)
+        self.setGeometry(0, 0, 800, 480)
 
         # Main menu bar
         self.menu = self.menuBar()
         self.menu_file = self.menu.addMenu("File")
-        # exit = QAction("Exit", self, triggered=qApp.quit)
-        # self.menu_file.addAction(exit)
 
         self.menu_about = self.menu.addMenu("&About")
-        # about = QAction("About Qt", self, shortcut=QKeySequence(QKeySequence.HelpContents),
-        #                 triggered=qApp.aboutQt)
-        # self.menu_about.addAction(about)
 
         # Create a label for the display camera
         self.label = QLabel(self)
-        self.label.setFixedSize(640, 480)
+        self.label.setFixedSize(580, 420)
+
+        self.button_settings = IconPushButton("settings", "settings")
+        self.button_unlock = IconPushButton("unlock", "unlock")
+        self.button_save = IconPushButton("save", "save")
+        self.button_silent = IconPushButton("ignore", "ignore")
+        extra_buttons = [self.button_settings, self.button_unlock, self.button_save, self.button_silent]
+        [button.setFixedSize(160, 48) for button in extra_buttons]
+
+        extra_buttons_layout = QVBoxLayout()
+        extra_buttons_layout.addWidget(self.button_settings, alignment=Qt.AlignCenter)
+        extra_buttons_layout.addWidget(self.button_unlock, alignment=Qt.AlignCenter)
+        extra_buttons_layout.addWidget(self.button_save, alignment=Qt.AlignCenter)
+        extra_buttons_layout.addWidget(self.button_silent, alignment=Qt.AlignCenter)
+
+        top_layout = QHBoxLayout()
+        top_layout.addWidget(self.label)
+        top_layout.addLayout(extra_buttons_layout)
 
         # Thread in charge of updating the image
         self.th = Thread(self)
         self.th.finished.connect(self.close)
         self.th.updateFrame.connect(self.set_image)
 
-        # Buttons layout
+        # Buttons layout 1
         buttons_layout = QHBoxLayout()
         self.button1 = QPushButton("Start")
         self.button2 = QPushButton("Stop/Close")
@@ -95,13 +102,15 @@ class Window(QMainWindow):
         buttons_layout.addWidget(self.button2)
         buttons_layout.addWidget(self.button1)
 
-        right_layout = QHBoxLayout()
-        right_layout.addLayout(buttons_layout, 1)
+        # Right layout for unlock button
+        right_layout = QVBoxLayout()
+        right_layout.addStretch()  # Add stretchable space to center the buttons vertically
 
         # Main layout
         layout = QVBoxLayout()
-        layout.addWidget(self.label)
-        layout.addLayout(right_layout)
+        layout.addLayout(top_layout)
+        layout.addLayout(buttons_layout)
+        layout.addStretch(1)  # Add stretchable space to push the buttons to the right
 
         # Central widget
         widget = QWidget(self)
