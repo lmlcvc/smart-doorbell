@@ -97,7 +97,7 @@ class Window(QMainWindow):
         # self.th.cap.release()
         cv2.destroyAllWindows()
         self.status = False
-        # self.th.terminate()
+        self.facial_recognition.terminate()
         # Give time for the thread to finish
         time.sleep(1)
 
