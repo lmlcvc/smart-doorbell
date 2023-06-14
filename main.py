@@ -6,9 +6,9 @@ import sys
 import time
 import cv2
 
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, pyqtSlot  # , Signal, Slot
+from PyQt5.QtCore import Qt, QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QImage, QKeySequence, QPixmap  # , QAction
-from PyQt5.QtWidgets import (QApplication, QComboBox, QGroupBox,
+from PyQt5.QtWidgets import (QApplication,
                              QHBoxLayout, QLabel, QMainWindow, QPushButton,
                              QSizePolicy, QVBoxLayout, QWidget)
 
@@ -21,13 +21,9 @@ class Thread(QThread):
 
     def __init__(self, parent=None):
         QThread.__init__(self, parent)
-        self.trained_file = None
+        self.trained_file = os.path.join(os.getcwd(), "haarcascade_frontalface_default.xml")
         self.status = True
         self.cap = True
-
-    def set_file(self, fname):
-        # The data comes with the 'opencv-python' module
-        self.trained_file = os.path.join(cv2.data.haarcascades, fname)
 
     def run(self):
         self.cap = cv2.VideoCapture(0)
@@ -88,21 +84,7 @@ class Window(QMainWindow):
         # Thread in charge of updating the image
         self.th = Thread(self)
         self.th.finished.connect(self.close)
-        self.th.updateFrame.connect(self.setImage)
-
-        # Model group
-        self.group_model = QGroupBox("Trained model")
-        self.group_model.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-        model_layout = QHBoxLayout()
-
-        self.combobox = QComboBox()
-        for xml_file in os.listdir(cv2.data.haarcascades):
-            if xml_file.endswith(".xml"):
-                self.combobox.addItem(xml_file)
-
-        model_layout.addWidget(QLabel("File:"), 10)
-        model_layout.addWidget(self.combobox, 90)
-        self.group_model.setLayout(model_layout)
+        self.th.updateFrame.connect(self.set_image)
 
         # Buttons layout
         buttons_layout = QHBoxLayout()
@@ -114,7 +96,6 @@ class Window(QMainWindow):
         buttons_layout.addWidget(self.button1)
 
         right_layout = QHBoxLayout()
-        right_layout.addWidget(self.group_model, 1)
         right_layout.addLayout(buttons_layout, 1)
 
         # Main layout
@@ -131,11 +112,6 @@ class Window(QMainWindow):
         self.button1.clicked.connect(self.start)
         self.button2.clicked.connect(self.kill_thread)
         self.button2.setEnabled(False)
-        self.combobox.currentTextChanged.connect(self.set_model)
-
-    @pyqtSlot(str)
-    def set_model(self, text):
-        self.th.set_file(text)
 
     @pyqtSlot()
     def kill_thread(self):
@@ -154,11 +130,10 @@ class Window(QMainWindow):
         print("Starting...")
         self.button2.setEnabled(True)
         self.button1.setEnabled(False)
-        self.th.set_file(self.combobox.currentText())
         self.th.start()
 
     @pyqtSlot(QImage)
-    def setImage(self, image):
+    def set_image(self, image):
         self.label.setPixmap(QPixmap.fromImage(image))
 
 
