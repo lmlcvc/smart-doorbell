@@ -1,4 +1,4 @@
-import shutil
+import os
 
 from PyQt5.QtCore import Qt, QDir, pyqtSignal
 from PyQt5.QtGui import QPixmap
@@ -6,7 +6,6 @@ from PyQt5.QtWidgets import (
     QScrollArea, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QFrame,
     QCheckBox, QPushButton, QSpacerItem, QSizePolicy, QLineEdit, QInputDialog, QMessageBox
 )
-import os
 
 from widgets.IconPushButton import IconPushButton
 
@@ -14,13 +13,16 @@ from widgets.IconPushButton import IconPushButton
 class SettingsTray(QFrame):
     name_changed = pyqtSignal(str, str)
 
-    def __init__(self):
+    def __init__(self, train_model):
         super().__init__()
         self.setWindowTitle("Settings")
         self.setFrameStyle(QFrame.Panel | QFrame.Raised)
         tray_width = 800
         tray_height = 400
         self.setFixedSize(tray_width, tray_height)
+
+        # An instance of TrainModel
+        self.train_model = train_model
 
         # Create the main layout
         layout = QVBoxLayout()
@@ -66,14 +68,18 @@ class SettingsTray(QFrame):
             user["name"] = new_name
             user["name_label"].setText(new_name)  # Update the label text
             self.name_changed.emit(user["name"], new_name)
+            self.train_model.train()
 
     def delete_user(self, user):
-        # TODO retrain model
-        confirmation = QMessageBox.question(self, "Delete User", f"Are you sure you want to delete {user['name']}?",
-                                            QMessageBox.Yes | QMessageBox.No)
-        if confirmation == QMessageBox.Yes:
-            folder_path = os.path.join("dataset", user["name"])
-            shutil.rmtree(folder_path)
+        confirm_dialog = QMessageBox.question(
+            self, "Delete User",
+            f"Are you sure you want to delete the user '{user['name']}'?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+
+        if confirm_dialog == QMessageBox.Yes:
+            self.train_model.delete_user(user["name"])
             self.refresh_settings_window()
 
     def refresh_settings_window(self):
@@ -91,7 +97,6 @@ class SettingsTray(QFrame):
                     "name": name,
                     "image": None,
                     "edit_button": None,
-                    "delete_button": None,
                     "name_label": None
                 }
                 images = os.listdir(name_path)
@@ -143,12 +148,9 @@ class SettingsTray(QFrame):
             delete_button.setFixedSize(button_width, button_height)
             delete_button.setLayoutDirection(Qt.LeftToRight)
             user_layout.addWidget(delete_button)
-            user["delete_button"] = delete_button
 
             # Connect the edit button click signal to the edit_name slot
             edit_button.clicked.connect(lambda _, user=user: self.edit_name(user))
-
-            # Connect the delete button click signal to the delete_user slot
             delete_button.clicked.connect(lambda _, user=user: self.delete_user(user))
 
             # Add the user layout to the scroll layout

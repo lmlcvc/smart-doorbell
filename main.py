@@ -1,14 +1,13 @@
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QLabel, QMainWindow, QPushButton, QSizePolicy, QVBoxLayout, \
     QWidget
-from PyQt5.QtGui import QImage, QPixmap, QFont
-from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import Qt
 
 import sys
-import time
-import cv2
 
 from util.facial_req import FacialRecognition
 from util.settings_tray import SettingsTray
+from util.train_model import TrainModel
 from widgets.IconPushButton import IconPushButton
 
 
@@ -51,6 +50,9 @@ class Window(QMainWindow):
         self.facial_recognition.finished.connect(self.close)
         self.facial_recognition.update_frame.connect(self.set_image)
 
+        # Model
+        self.train_model = TrainModel()
+
         # Buttons layout
         buttons_layout = QHBoxLayout()
         self.button1 = QPushButton("Start")
@@ -67,7 +69,7 @@ class Window(QMainWindow):
         layout.addStretch(1)  # Add stretchable space to push the buttons to the right
 
         # Settings dialog
-        self.settings_tray = SettingsTray()
+        self.settings_tray = SettingsTray(self.train_model)
 
         # Central widget
         widget = QWidget(self)
