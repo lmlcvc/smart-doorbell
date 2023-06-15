@@ -13,6 +13,7 @@ from widgets.IconPushButton import IconPushButton
 
 class Window(QMainWindow):
     bell_silent = pyqtSignal()
+    unlock = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -78,11 +79,14 @@ class Window(QMainWindow):
         self.button2.clicked.connect(self.kill_thread)
         self.button2.setEnabled(False)
 
+        self.button_unlock.clicked.connect(self.emit_unlock_signal)
         self.button_silent.clicked.connect(self.emit_bell_silent_signal)
-
 
     def emit_bell_silent_signal(self):
         self.bell_silent.emit()
+
+    def emit_unlock_signal(self):
+        self.unlock.emit()
 
     @pyqtSlot()
     def kill_thread(self):
@@ -100,8 +104,10 @@ class Window(QMainWindow):
         print("Starting...")
         self.button2.setEnabled(True)
         self.button1.setEnabled(False)
-        # self.th.start()
+
         self.facial_recognition.start()
+
+        self.unlock.connect(self.facial_recognition.handle_unlock_signal)
         self.bell_silent.connect(self.facial_recognition.handle_bell_silent_signal)
 
     @pyqtSlot(QImage)

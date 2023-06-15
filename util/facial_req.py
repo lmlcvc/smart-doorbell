@@ -66,7 +66,7 @@ class FacialRecognition(QThread):
         self.last_bell = None
         self.last_unlock = None
 
-    def set_bell(self, value, user="user"):
+    def set_bell(self, value, user="system"):
         self.BELL_PRESSED = value
         print(f"{datetime.now()} - {user} set bell to {value}")
 
@@ -78,7 +78,7 @@ class FacialRecognition(QThread):
         self.last_bell = datetime.now()
         self.set_bell(True)
 
-    def bell_off(self, user="user"):
+    def bell_off(self, user="system"):
         self.LED_Y.off()
         self.set_bell(False, user)
 
@@ -108,16 +108,17 @@ class FacialRecognition(QThread):
         print(f"{datetime.now()} - door locked")
 
     def unlock_door(self, name):
-        self.LED_R.off()
-        self.LED_Y.off()
-        self.LED_G.on()
+        if self.BELL_PRESSED:
+            self.LED_R.off()
+            self.LED_Y.off()
+            self.LED_G.on()
 
-        self.bell_off()
+            self.bell_off()
 
-        self.DOOR_UNLOCKED = True
-        self.last_unlock = datetime.now()
+            self.DOOR_UNLOCKED = True
+            self.last_unlock = datetime.now()
 
-        print(f"{datetime.now()} - door unlocked for {name}")
+            print(f"{datetime.now()} - door unlocked for {name}")
 
     def facial_recognition(self):
         # Detect the fce boxes
@@ -174,7 +175,11 @@ class FacialRecognition(QThread):
                         color=(0, 255, 255),
                         thickness=2)
 
-    @pyqtSlot()  # Decorate the slot method to handle the signal
+    @pyqtSlot()
+    def handle_unlock_signal(self):
+        self.unlock_door(name="admin")
+
+    @pyqtSlot()
     def handle_bell_silent_signal(self):
         if self.BELL_PRESSED:
             self.bell_off(user="admin")
@@ -185,17 +190,18 @@ class FacialRecognition(QThread):
             self.BUTTON_DOOR.when_released = self.door_closed
             self.BUTTON_BELL.when_released = self.bell_on
 
-            # conditions to indicate door re-lock
-            if self.DOOR_UNLOCKED and not self.last_unlock is None:
-                time_diff = datetime.now() - self.last_unlock
-                if time_diff.total_seconds() >= self.WAIT_SECONDS_LOCK:
-                    print(f"{datetime.now()} - timeout: door re-locked")
-
             # conditions to indicate door open for too long
             if not self.last_open is None:
                 time_diff = datetime.now() - self.last_open
                 if time_diff.total_seconds() >= self.WAIT_SECONDS_OPEN:
                     print("JESI NA BRODU ROĐEN ZATVARAJ VRATA ALO")
+
+            # conditions to indicate door re-lock
+            if self.DOOR_UNLOCKED and not self.last_unlock is None and not self.DOOR_OPENED:
+                time_diff = datetime.now() - self.last_unlock
+                if time_diff.total_seconds() >= self.WAIT_SECONDS_LOCK:
+                    self.lock_door()
+                    print(f"{datetime.now()} - timeout: door re-locked")
 
             # bell timeout
             if self.BELL_PRESSED and not self.last_bell is None:
