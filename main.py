@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QLabel, QMainWindow, QPushButton, QSizePolicy, QVBoxLayout, \
     QWidget
-from PyQt5.QtGui import QImage, QPixmap, QPainter, QFont, QColor
-from PyQt5.QtCore import Qt, pyqtSlot, QPoint, pyqtSignal
+from PyQt5.QtGui import QImage, QPixmap, QFont
+from PyQt5.QtCore import Qt, QPoint
 
 import sys
 import time
@@ -13,20 +13,16 @@ from widgets.IconPushButton import IconPushButton
 
 
 class Window(QMainWindow):
-    bell_silent = pyqtSignal()
-    unlock = pyqtSignal()
-
     def __init__(self):
         super().__init__()
+
         # Title and dimensions
-        self.status = None
         self.setWindowTitle("Smart doorbell")
         self.setGeometry(0, 0, 800, 480)
 
         # Main menu bar
         self.menu = self.menuBar()
         self.menu_file = self.menu.addMenu("File")
-
         self.menu_about = self.menu.addMenu("&About")
 
         # Create a label for the display camera
@@ -55,7 +51,7 @@ class Window(QMainWindow):
         self.facial_recognition.finished.connect(self.close)
         self.facial_recognition.update_frame.connect(self.set_image)
 
-        # Buttons layout 1
+        # Buttons layout
         buttons_layout = QHBoxLayout()
         self.button1 = QPushButton("Start")
         self.button2 = QPushButton("Stop/Close")
@@ -83,12 +79,11 @@ class Window(QMainWindow):
         self.button2.clicked.connect(self.kill_thread)
         self.button2.setEnabled(False)
 
-        self.button_unlock.clicked.connect(self.emit_unlock_signal)
-        self.button_silent.clicked.connect(self.emit_bell_silent_signal)
+        self.button_unlock.clicked.connect(self.facial_recognition.handle_unlock_signal)
+        self.button_silent.clicked.connect(self.facial_recognition.handle_bell_silent_signal)
 
         self.button_settings.clicked.connect(self.show_settings)
 
-    @pyqtSlot()
     def show_settings(self):
         self.settings_tray.show()
         self.settings_tray.adjustSize()
@@ -98,41 +93,23 @@ class Window(QMainWindow):
         )
         self.settings_tray.setFocus(Qt.PopupFocusReason)
 
-    def emit_bell_silent_signal(self):
-        self.bell_silent.emit()
-
-    def emit_unlock_signal(self):
-        self.unlock.emit()
-
-    @pyqtSlot()
     def kill_thread(self):
-        print("Finishing...")
-        self.button2.setEnabled(False)
+        print("Finishing thread")
+        self.facial_recognition.finish_thread = True
         self.button1.setEnabled(True)
-        cv2.destroyAllWindows()
-        self.status = False
-        self.facial_recognition.terminate()
-        # Give time for the thread to finish
-        time.sleep(1)
+        self.button2.setEnabled(False)
 
-    @pyqtSlot()
     def start(self):
-        print("Starting...")
-        self.button2.setEnabled(True)
-        self.button1.setEnabled(False)
-
         self.facial_recognition.start()
+        self.button1.setEnabled(False)
+        self.button2.setEnabled(True)
 
-        self.unlock.connect(self.facial_recognition.handle_unlock_signal)
-        self.bell_silent.connect(self.facial_recognition.handle_bell_silent_signal)
-
-    @pyqtSlot(QImage)
     def set_image(self, image):
         self.label.setPixmap(QPixmap.fromImage(image))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app = QApplication(sys.argv)
-    w = Window()
-    w.show()
+    window = Window()
+    window.show()
     sys.exit(app.exec_())
