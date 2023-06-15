@@ -8,6 +8,7 @@ import time
 import cv2
 
 from util.facial_req import FacialRecognition
+from util.settings_tray import SettingsTray
 from widgets.IconPushButton import IconPushButton
 
 
@@ -69,6 +70,9 @@ class Window(QMainWindow):
         layout.addLayout(buttons_layout)
         layout.addStretch(1)  # Add stretchable space to push the buttons to the right
 
+        # Settings dialog
+        self.settings_tray = SettingsTray()
+
         # Central widget
         widget = QWidget(self)
         widget.setLayout(layout)
@@ -81,6 +85,18 @@ class Window(QMainWindow):
 
         self.button_unlock.clicked.connect(self.emit_unlock_signal)
         self.button_silent.clicked.connect(self.emit_bell_silent_signal)
+
+        self.button_settings.clicked.connect(self.show_settings)
+
+    @pyqtSlot()
+    def show_settings(self):
+        self.settings_tray.show()
+        self.settings_tray.adjustSize()
+        self.settings_tray.move(
+            self.width() - self.settings_tray.width() - 10,
+            self.height() - self.settings_tray.height() - 10
+        )
+        self.settings_tray.setFocus(Qt.PopupFocusReason)
 
     def emit_bell_silent_signal(self):
         self.bell_silent.emit()
