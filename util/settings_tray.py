@@ -1,8 +1,10 @@
+import shutil
+
 from PyQt5.QtCore import Qt, QDir, pyqtSignal
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import (
     QScrollArea, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QFrame,
-    QCheckBox, QPushButton, QSpacerItem, QSizePolicy, QLineEdit, QInputDialog
+    QCheckBox, QPushButton, QSpacerItem, QSizePolicy, QLineEdit, QInputDialog, QMessageBox
 )
 import os
 
@@ -65,6 +67,15 @@ class SettingsTray(QFrame):
             user["name_label"].setText(new_name)  # Update the label text
             self.name_changed.emit(user["name"], new_name)
 
+    def delete_user(self, user):
+        # TODO retrain model
+        confirmation = QMessageBox.question(self, "Delete User", f"Are you sure you want to delete {user['name']}?",
+                                            QMessageBox.Yes | QMessageBox.No)
+        if confirmation == QMessageBox.Yes:
+            folder_path = os.path.join("dataset", user["name"])
+            shutil.rmtree(folder_path)
+            self.refresh_settings_window()
+
     def refresh_settings_window(self):
         # Clear the existing layout
         self.clear_scroll_layout()
@@ -80,6 +91,7 @@ class SettingsTray(QFrame):
                     "name": name,
                     "image": None,
                     "edit_button": None,
+                    "delete_button": None,
                     "name_label": None
                 }
                 images = os.listdir(name_path)
@@ -131,9 +143,13 @@ class SettingsTray(QFrame):
             delete_button.setFixedSize(button_width, button_height)
             delete_button.setLayoutDirection(Qt.LeftToRight)
             user_layout.addWidget(delete_button)
+            user["delete_button"] = delete_button
 
             # Connect the edit button click signal to the edit_name slot
             edit_button.clicked.connect(lambda _, user=user: self.edit_name(user))
+
+            # Connect the delete button click signal to the delete_user slot
+            delete_button.clicked.connect(lambda _, user=user: self.delete_user(user))
 
             # Add the user layout to the scroll layout
             self.scroll_layout.addLayout(user_layout)
