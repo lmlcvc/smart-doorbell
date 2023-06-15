@@ -1,4 +1,4 @@
-from PyQt5.QtCore import pyqtSignal, QThread
+from PyQt5.QtCore import pyqtSignal, QThread, pyqtSlot
 from PyQt5.QtGui import QImage
 from imutils.video import VideoStream, FPS
 import face_recognition
@@ -66,9 +66,9 @@ class FacialRecognition(QThread):
         self.last_bell = None
         self.last_unlock = None
 
-    def set_bell(self, value):
+    def set_bell(self, value, user="user"):
         self.BELL_PRESSED = value
-        print(f"{datetime.now()} - bell set to {value}")
+        print(f"{datetime.now()} - {user} set bell to {value}")
 
     def bell_on(self):
         if self.BELL_PRESSED:
@@ -78,9 +78,9 @@ class FacialRecognition(QThread):
         self.last_bell = datetime.now()
         self.set_bell(True)
 
-    def bell_off(self):
+    def bell_off(self, user="user"):
         self.LED_Y.off()
-        self.set_bell(False)
+        self.set_bell(False, user)
 
     def door_closed(self):
         if self.DOOR_UNLOCKED:
@@ -174,6 +174,11 @@ class FacialRecognition(QThread):
                         color=(0, 255, 255),
                         thickness=2)
 
+    @pyqtSlot()  # Decorate the slot method to handle the signal
+    def handle_bell_silent_signal(self):
+        if self.BELL_PRESSED:
+            self.bell_off(user="admin")
+
     def run(self):
         while self.status:
             self.BUTTON_DOOR.when_pressed = self.door_open
@@ -196,8 +201,7 @@ class FacialRecognition(QThread):
             if self.BELL_PRESSED and not self.last_bell is None:
                 time_diff = datetime.now() - self.last_bell
                 if time_diff.total_seconds() >= self.BELL_SECONDS:
-                    self.bell_off()
-                    print(f"{datetime.now()} - timeout: bell turned off")
+                    self.bell_off(user="timeout")
 
             # grab the frame from the threaded video stream
             self.frame = self.vs.read()

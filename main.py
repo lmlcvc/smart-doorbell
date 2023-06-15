@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QLabel, QMainWindow, QPushButton, QSizePolicy, QVBoxLayout, \
     QWidget
 from PyQt5.QtGui import QImage, QPixmap, QPainter, QFont, QColor
-from PyQt5.QtCore import Qt, pyqtSlot, QPoint
+from PyQt5.QtCore import Qt, pyqtSlot, QPoint, pyqtSignal
 
 import sys
 import time
@@ -12,12 +12,13 @@ from widgets.IconPushButton import IconPushButton
 
 
 class Window(QMainWindow):
+    bell_silent = pyqtSignal()
 
     def __init__(self):
         super().__init__()
         # Title and dimensions
         self.status = None
-        self.setWindowTitle("Patterns detection")
+        self.setWindowTitle("Smart doorbell")
         self.setGeometry(0, 0, 800, 480)
 
         # Main menu bar
@@ -77,6 +78,12 @@ class Window(QMainWindow):
         self.button2.clicked.connect(self.kill_thread)
         self.button2.setEnabled(False)
 
+        self.button_silent.clicked.connect(self.emit_bell_silent_signal)
+
+
+    def emit_bell_silent_signal(self):
+        self.bell_silent.emit()
+
     @pyqtSlot()
     def kill_thread(self):
         print("Finishing...")
@@ -95,6 +102,7 @@ class Window(QMainWindow):
         self.button1.setEnabled(False)
         # self.th.start()
         self.facial_recognition.start()
+        self.bell_silent.connect(self.facial_recognition.handle_bell_silent_signal)
 
     @pyqtSlot(QImage)
     def set_image(self, image):
