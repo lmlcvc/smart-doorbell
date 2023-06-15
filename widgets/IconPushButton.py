@@ -1,7 +1,7 @@
 import os.path
 
-from PyQt5.QtCore import QSize
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton
+from PyQt5.QtCore import QSize, Qt
+from PyQt5.QtWidgets import QVBoxLayout, QPushButton
 from PyQt5.QtGui import QIcon
 
 
@@ -20,8 +20,9 @@ class IconPushButton(QPushButton):
 
         # Set the button style sheet to place the icon on the left side and text on the right
         button.setStyleSheet(
-            "QPushButton { border: none; text-align: left; padding-left: %dpx; }"
-            "QPushButton::icon { margin-right: 8px; }" % (button.iconSize().width() + 8)
+            "QPushButton { border: none; text-align: left; padding-left: 0px; }"
+            "QPushButton::icon { margin-right: 8px; }"
         )
+        button.setLayoutDirection(Qt.LeftToRight)
 
         layout.addWidget(button)
