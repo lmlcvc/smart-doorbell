@@ -18,7 +18,6 @@ def get_users():
     return users
 
 
-
 class TrainModel:
     def __init__(self):
         self.dataset_path = "dataset"
@@ -37,12 +36,11 @@ class TrainModel:
                 if isinstance(data, dict) and "encodings" in data and "names" in data:
                     self.known_encodings = data["encodings"]
                     self.known_names = data["names"]
-                    self.encoding_dict = {tuple(encoding): name for encoding, name in
-                                          zip(self.known_encodings, self.known_names)}
 
     def save_encodings(self):
-        with open(self.encodings_path, 'wb') as file:
-            pickle.dump((self.known_names, self.known_encodings), file)
+        data = {"encodings": self.known_encodings, "names": self.known_names}
+        with open(self.encodings_path, "wb") as f:
+            f.write(pickle.dumps(data))
 
     def train(self):
         # Collect user information
@@ -76,25 +74,18 @@ class TrainModel:
 
         # Dump the facial encodings + names to disk
         print("[INFO] Serializing encodings...")
-        # data = {"encodings": known_encodings, "names": known_names}
-        # with open(self.encodings_path, "wb") as f:
-        #     f.write(pickle.dumps(data))
-
-        # Save the updated encodings
         self.save_encodings()
 
     def rename_user(self, old_name, new_name):
+
+        print(f"Renaming {old_name} to {new_name}\n")
+
         if old_name in self.known_names:
-            index = self.known_names.index(old_name)
-            self.known_names[index] = new_name
+            for index, name in enumerate(self.known_names):
+                if name == old_name:
+                    self.known_names[index] = new_name
+
             self.save_encodings()
-
-            # Update the encodings with the new name
-            encodings = self.known_encodings[index]
-            del self.known_encodings[index]
-            for encoding in encodings:
-                self.known_encodings.append(encoding)
-
             self.load_encodings()
 
     def delete_user(self, name):

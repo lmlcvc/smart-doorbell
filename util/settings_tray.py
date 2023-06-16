@@ -65,15 +65,9 @@ class SettingsTray(QFrame):
             old_path = os.path.join("dataset", user["name"])
             new_path = os.path.join("dataset", new_name)
             QDir().rename(old_path, new_path)
-            user["name"] = new_name
+
             user["name_label"].setText(new_name)  # Update the label text
-            self.name_changed.emit(user["name"], new_name)
             self.train_model.rename_user(user["name"], new_name)
-            # FIXME new encodings names not loaded to authorised users after edit
-            # if re-loading encodings doesn't work, user info could be accessed through a json file
-            # in each user's folder
-            # { display_name : "name", authorised : "true" }
-            # ali to je ružno
 
     def delete_user(self, user):
         confirm_dialog = QMessageBox.question(

@@ -47,8 +47,9 @@ class FacialRecognition(QThread):
 
         # load the known faces and embeddings along with OpenCV's Haar cascade for face detection
         self.currentname = "unknown"
+
         self.encodingsP = "encodings.pickle"
-        print("[INFO] loading encodings + face detector...")
+        print(f"[INFO] loading encodings from {self.encodingsP} + face detector...")
         with open(self.encodingsP, "rb") as file:
             self.data = pickle.load(file)
         self.encodings_timestamp = os.path.getmtime(self.encodingsP)  # Store initial modification timestamp
@@ -125,12 +126,6 @@ class FacialRecognition(QThread):
             print(f"{datetime.now()} - door unlocked for {name}")
 
     def facial_recognition(self):
-        # Check if encodingsP file has been modified
-        if os.path.getmtime(self.encodingsP) > self.encodings_timestamp:
-            print("[INFO] Reloading encodings...")
-            with open(self.encodingsP, "rb") as file:
-                self.data = pickle.load(file)
-            self.encodings_timestamp = os.path.getmtime(self.encodingsP)  # Update modification timestamp
 
         # Detect the face boxes
         boxes = face_recognition.face_locations(self.frame)
@@ -212,6 +207,13 @@ class FacialRecognition(QThread):
 
     def run(self):
         while self.status:
+            # Check if encodingsP file has been modified
+            if os.path.getmtime(self.encodingsP) > self.encodings_timestamp:
+                print("[INFO] Reloading encodings...")
+                with open(self.encodingsP, "rb") as file:
+                    self.data = pickle.load(file)
+                self.encodings_timestamp = os.path.getmtime(self.encodingsP)  # Update modification timestamp
+
             self.BUTTON_DOOR.when_pressed = self.door_open
             self.BUTTON_DOOR.when_released = self.door_closed
             self.BUTTON_BELL.when_released = self.bell_on
