@@ -125,8 +125,20 @@ class FacialRecognition(QThread):
 
             print(f"{datetime.now()} - door unlocked for {name}")
 
-    def facial_recognition(self):
+    def get_frame_image(self):
+        if self.frame is not None:
+            frame_rgb = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
+            image = QImage(
+                frame_rgb.data,
+                frame_rgb.shape[1],
+                frame_rgb.shape[0],
+                QImage.Format_RGB888
+            )
+            return image
 
+        return None
+
+    def facial_recognition(self):
         # Detect the face boxes
         boxes = face_recognition.face_locations(self.frame)
         # compute the facial embeddings for each face bounding box

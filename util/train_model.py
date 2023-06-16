@@ -42,6 +42,10 @@ class TrainModel:
         with open(self.encodings_path, "wb") as f:
             f.write(pickle.dumps(data))
 
+    def user_exists(self, username):
+        user_directory = os.path.join(self.dataset_path, username)
+        return os.path.isdir(user_directory)
+
     def train(self):
         # Collect user information
         image_paths = list(paths.list_images(self.dataset_path))

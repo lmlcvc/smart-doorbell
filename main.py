@@ -1,7 +1,9 @@
+import os
+
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QLabel, QMainWindow, QPushButton, QSizePolicy, QVBoxLayout, \
-    QWidget
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import Qt
+    QWidget, QLineEdit, QMessageBox, QInputDialog
+from PyQt5.QtGui import QPixmap, QImage
+from PyQt5.QtCore import Qt, QTimer
 
 import sys
 
@@ -85,6 +87,14 @@ class Window(QMainWindow):
         self.button_silent.clicked.connect(self.facial_recognition.handle_bell_silent_signal)
 
         self.button_settings.clicked.connect(self.show_settings)
+        self.button_save.clicked.connect(self.save_user)
+
+        # Timer for capturing images
+        self.capture_timer = QTimer()
+        self.capture_timer.setInterval(1000)  # 1 second interval
+        self.capture_timer.timeout.connect(self.capture_image)
+        self.capture_counter = 0
+        self.capture_images = []
 
     def show_settings(self):
         self.settings_tray.show()
@@ -108,6 +118,48 @@ class Window(QMainWindow):
 
     def set_image(self, image):
         self.label.setPixmap(QPixmap.fromImage(image))
+
+    def save_user(self):
+        self.capture_images = []  # Reset the captured images list
+        self.capture_counter = 0  # Reset the capture counter
+        self.capture_timer.start()  # Start the timer to capture images
+
+    def capture_image(self):
+        if self.capture_counter < 5:
+            image = self.facial_recognition.get_frame_image()  # Capture the current frame image
+            if image is not None:
+                self.capture_images.append(image)  # Add the image to the captured images list
+                self.capture_counter += 1  # Increment the capture counter
+
+                if self.capture_counter == 5:
+                    # Stop the timer after capturing 5 images
+                    self.capture_timer.stop()
+
+                    # Prompt the user to enter a name for the new user
+                    name, ok = QInputDialog.getText(self, "New User", "Enter the user name:")
+                    if ok and name:
+                        user_directory = os.path.join("dataset", name)
+                        if not self.train_model.user_exists(name) and not os.path.exists(user_directory):
+                            os.makedirs(user_directory)
+                            for i, img in enumerate(self.capture_images):
+                                img_path = os.path.join(user_directory, f"{name}_{i + 1}.jpg")
+                                img.save(img_path)
+
+                            # Refresh the settings window to include the new user
+                            self.settings_tray.refresh_settings_window()
+                            QMessageBox.information(self, "User Saved", "New user saved successfully.")
+                        else:
+                            QMessageBox.warning(self, "Error", "User already exists.")
+
+                        self.capture_images = []  # Clear the captured images list
+                        self.capture_counter = 0  # Reset the capture counter
+        else:
+            # Stop the timer if the desired number of images has been captured
+            self.capture_timer.stop()
+            QMessageBox.warning(self, "Error", "Failed to capture images.")
+
+            self.capture_images = []  # Clear the captured images list
+            self.capture_counter = 0  # Reset the capture counter
 
 
 if __name__ == '__main__':
