@@ -77,7 +77,6 @@ class TrainModel:
         self.save_encodings()
 
     def rename_user(self, old_name, new_name):
-
         print(f"Renaming {old_name} to {new_name}\n")
 
         if old_name in self.known_names:
@@ -89,9 +88,18 @@ class TrainModel:
             self.load_encodings()
 
     def delete_user(self, name):
+        print(f"Deleting user {name}")
+
+        print(self.known_names, len(self.known_encodings))
         if name in self.known_names:
-            index = self.known_names.index(name)
-            del self.known_names[index]
-            del self.known_encodings[index]
-            self.save_encodings()
-            self.load_encodings()
+            for index, known_name in enumerate(self.known_names):
+                if known_name == name:
+                    del self.known_names[index]
+                    del self.known_encodings[index]
+        print(self.known_names, len(self.known_encodings))
+
+        # index = self.known_names.index(name)
+        # del self.known_names[index]
+        # del self.known_encodings[index]
+        self.save_encodings()
+        self.load_encodings()

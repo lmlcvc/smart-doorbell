@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from PyQt5.QtCore import Qt, QDir, pyqtSignal
 from PyQt5.QtGui import QPixmap
@@ -78,6 +79,9 @@ class SettingsTray(QFrame):
         )
 
         if confirm_dialog == QMessageBox.Yes:
+            user_directory = os.path.join("dataset", user["name"])
+            shutil.rmtree(user_directory)
+
             self.train_model.delete_user(user["name"])
             self.refresh_settings_window()
 
@@ -112,6 +116,13 @@ class SettingsTray(QFrame):
         image_height = 96
         button_width = 120
         button_height = 48
+
+        # Remove old name labels
+        for user in users:
+            name_label = user["name_label"]
+            if name_label:
+                name_label.setParent(None)
+                name_label.deleteLater()
 
         for user in users:
             user_layout = QHBoxLayout()
@@ -158,6 +169,11 @@ class SettingsTray(QFrame):
         # Set the scroll widget layout and adjust the size
         self.scroll_widget.setLayout(self.scroll_layout)
         self.scroll_area.setWidget(self.scroll_widget)
+
+        # Force the scroll area to update its layout
+        self.scroll_area.updateGeometry()
+
+        # Adjust the size of the settings tray
         self.adjustSize()
 
     def clear_scroll_layout(self):
@@ -167,4 +183,5 @@ class SettingsTray(QFrame):
             item = scroll_layout.takeAt(0)
             widget = item.widget()
             if widget:
+                widget.setParent(None)
                 widget.deleteLater()
