@@ -68,7 +68,12 @@ class SettingsTray(QFrame):
             user["name"] = new_name
             user["name_label"].setText(new_name)  # Update the label text
             self.name_changed.emit(user["name"], new_name)
-            self.train_model.train()
+            self.train_model.rename_user(user["name"], new_name)
+            # FIXME new encodings names not loaded to authorised users after edit
+            # if re-loading encodings doesn't work, user info could be accessed through a json file
+            # in each user's folder
+            # { display_name : "name", authorised : "true" }
+            # ali to je ružno
 
     def delete_user(self, user):
         confirm_dialog = QMessageBox.question(

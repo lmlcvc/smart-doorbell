@@ -1,3 +1,5 @@
+import os
+
 from PyQt5.QtCore import pyqtSignal, QThread, pyqtSlot
 from PyQt5.QtGui import QImage
 from imutils.video import VideoStream, FPS
@@ -47,7 +49,9 @@ class FacialRecognition(QThread):
         self.currentname = "unknown"
         self.encodingsP = "encodings.pickle"
         print("[INFO] loading encodings + face detector...")
-        self.data = pickle.loads(open(self.encodingsP, "rb").read())
+        with open(self.encodingsP, "rb") as file:
+            self.data = pickle.load(file)
+        self.encodings_timestamp = os.path.getmtime(self.encodingsP)  # Store initial modification timestamp
 
         # initialize the video stream and allow the camera sensor to warm up
         self.vs = VideoStream(src=-1, framerate=10).start()
@@ -121,7 +125,14 @@ class FacialRecognition(QThread):
             print(f"{datetime.now()} - door unlocked for {name}")
 
     def facial_recognition(self):
-        # Detect the fce boxes
+        # Check if encodingsP file has been modified
+        if os.path.getmtime(self.encodingsP) > self.encodings_timestamp:
+            print("[INFO] Reloading encodings...")
+            with open(self.encodingsP, "rb") as file:
+                self.data = pickle.load(file)
+            self.encodings_timestamp = os.path.getmtime(self.encodingsP)  # Update modification timestamp
+
+        # Detect the face boxes
         boxes = face_recognition.face_locations(self.frame)
         # compute the facial embeddings for each face bounding box
         encodings = face_recognition.face_encodings(self.frame, boxes)
@@ -155,7 +166,7 @@ class FacialRecognition(QThread):
 
             # update the list of names
             names.append(name)
-            return names, boxes
+        return names, boxes
 
     def set_boxes(self, boxes, names):
         # loop over the recognized faces
@@ -184,6 +195,21 @@ class FacialRecognition(QThread):
         if self.BELL_PRESSED:
             self.bell_off(user="admin")
 
+    def process_frame(self):
+        # grab the frame from the threaded video stream
+        self.frame = self.vs.read()
+        self.frame = imutils.resize(self.frame, width=420)
+
+        # run facial recognition, display names if found
+        names, boxes = self.facial_recognition() or (None, None)
+        if names is not None and boxes is not None:
+            self.set_boxes(boxes, names)
+
+        height, width, channel = self.frame.shape
+        bytes_per_line = channel * width
+        img = QImage(self.frame.data, width, height, bytes_per_line, QImage.Format_BGR888)
+        self.update_frame.emit(img)
+
     def run(self):
         while self.status:
             self.BUTTON_DOOR.when_pressed = self.door_open
@@ -209,18 +235,6 @@ class FacialRecognition(QThread):
                 if time_diff.total_seconds() >= self.BELL_SECONDS:
                     self.bell_off(user="timeout")
 
-            # grab the frame from the threaded video stream
-            self.frame = self.vs.read()
-            self.frame = imutils.resize(self.frame, width=420)
-
-            # run facial recognition, display names if found
-            names, boxes = self.facial_recognition() or (None, None)
-            if names is not None and boxes is not None:
-                self.set_boxes(boxes, names)
-
-            height, width, channel = self.frame.shape
-            bytes_per_line = channel * width
-            img = QImage(self.frame.data, width, height, bytes_per_line, QImage.Format_BGR888)
-            self.update_frame.emit(img)
+            self.process_frame()
 
         sys.exit(-1)
