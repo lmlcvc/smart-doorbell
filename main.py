@@ -10,6 +10,7 @@ import sys
 from util.facial_req import FacialRecognition
 from util.settings_tray import SettingsTray
 from util.train_model import TrainModel
+from util.train_thread import TrainThread
 from widgets.IconPushButton import IconPushButton
 
 
@@ -47,6 +48,12 @@ class Window(QMainWindow):
         top_layout.addWidget(self.label)
         top_layout.addLayout(extra_buttons_layout)
 
+        # Re-training model label
+        self.retrain_label = QLabel("Re-training model...", self)
+        self.retrain_label.setObjectName("retrain_label")
+        self.retrain_label.setAlignment(Qt.AlignCenter)
+        self.retrain_label.hide()
+
         # Facial recognition
         self.facial_recognition = FacialRecognition(self)
         self.facial_recognition.finished.connect(self.close)
@@ -54,6 +61,7 @@ class Window(QMainWindow):
 
         # Model
         self.train_model = TrainModel()
+        self.train_thread = TrainThread(self.train_model)
 
         # Buttons layout
         buttons_layout = QHBoxLayout()
@@ -69,6 +77,7 @@ class Window(QMainWindow):
         layout.addLayout(top_layout)
         layout.addLayout(buttons_layout)
         layout.addStretch(1)  # Add stretchable space to push the buttons to the right
+        layout.addWidget(self.retrain_label)  # Add the re-training model label to the layout
 
         # Settings dialog
         self.settings_tray = SettingsTray(self.train_model)
@@ -124,6 +133,9 @@ class Window(QMainWindow):
         self.capture_counter = 0  # Reset the capture counter
         self.capture_timer.start()  # Start the timer to capture images
 
+    def training_finished(self):
+        self.retrain_label.hide()  # Hide the re-training model label after training finished
+
     def capture_image(self):
         if self.capture_counter < 5:
             image = self.facial_recognition.get_frame_image()  # Capture the current frame image
@@ -160,6 +172,9 @@ class Window(QMainWindow):
 
             self.capture_images = []  # Clear the captured images list
             self.capture_counter = 0  # Reset the capture counter
+            return
+        self.retrain_label.show()  # Show the re-training model label
+        self.train_thread.start()  # Start the train thread
 
 
 if __name__ == '__main__':
