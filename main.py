@@ -1,7 +1,7 @@
 import os
-
+import shutil
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QLabel, QMainWindow, QPushButton, QSizePolicy, QVBoxLayout, \
-    QWidget, QLineEdit, QMessageBox, QInputDialog
+    QWidget, QLineEdit, QMessageBox, QInputDialog, QFileDialog
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtCore import Qt, QTimer
 
@@ -34,15 +34,14 @@ class Window(QMainWindow):
         self.button_settings = IconPushButton("settings", "settings")
         self.button_unlock = IconPushButton("unlock", "unlock")
         self.button_save = IconPushButton("save", "save")
+        self.button_add_user = IconPushButton("add user", "add_user.png")
         self.button_silent = IconPushButton("ignore", "ignore")
-        extra_buttons = [self.button_settings, self.button_unlock, self.button_save, self.button_silent]
+        extra_buttons = [self.button_settings, self.button_unlock, self.button_save, self.button_add_user,
+                         self.button_silent]
         [button.setFixedSize(160, 48) for button in extra_buttons]
 
         extra_buttons_layout = QVBoxLayout()
-        extra_buttons_layout.addWidget(self.button_settings, alignment=Qt.AlignCenter)
-        extra_buttons_layout.addWidget(self.button_unlock, alignment=Qt.AlignCenter)
-        extra_buttons_layout.addWidget(self.button_save, alignment=Qt.AlignCenter)
-        extra_buttons_layout.addWidget(self.button_silent, alignment=Qt.AlignCenter)
+        [extra_buttons_layout.addWidget(button, alignment=Qt.AlignCenter) for button in extra_buttons]
 
         top_layout = QHBoxLayout()
         top_layout.addWidget(self.label)
@@ -97,6 +96,7 @@ class Window(QMainWindow):
 
         self.button_settings.clicked.connect(self.show_settings)
         self.button_save.clicked.connect(self.save_user)
+        self.button_add_user.clicked.connect(self.add_user)
 
         # Timer for capturing images
         self.capture_timer = QTimer()
@@ -165,6 +165,9 @@ class Window(QMainWindow):
 
                         self.capture_images = []  # Clear the captured images list
                         self.capture_counter = 0  # Reset the capture counter
+                else:
+                    self.retrain_label.show()  # Show the re-training model label
+                    self.train_thread.start()  # Start the train thread
         else:
             # Stop the timer if the desired number of images has been captured
             self.capture_timer.stop()
@@ -173,8 +176,32 @@ class Window(QMainWindow):
             self.capture_images = []  # Clear the captured images list
             self.capture_counter = 0  # Reset the capture counter
             return
-        self.retrain_label.show()  # Show the re-training model label
-        self.train_thread.start()  # Start the train thread
+
+    def add_user(self):
+        name, ok = QInputDialog.getText(self, "Add User", "Enter the user name:")
+        if ok and name:
+            file_dialog = QFileDialog(self)
+            file_dialog.setFileMode(QFileDialog.ExistingFiles)
+            file_dialog.setNameFilter("Images (*.jpg *.png)")
+            if file_dialog.exec_():
+                files = file_dialog.selectedFiles()
+                user_directory = os.path.join("dataset", name)
+                if not self.train_model.user_exists(name) and not os.path.exists(user_directory):
+                    os.makedirs(user_directory)
+                    for i, file in enumerate(files):
+                        src_path = file
+                        dest_path = os.path.join(user_directory, f"{name}_{i + 1}.jpg")
+                        shutil.copyfile(src_path, dest_path)
+
+                    # Refresh the settings window to include the new user
+                    self.settings_tray.refresh_settings_window()
+                    QMessageBox.information(self, "User Added", "New user added successfully.")
+
+                    self.train_model.train()
+                else:
+                    QMessageBox.warning(self, "Error", "User already exists.")
+        else:
+            QMessageBox.warning(self, "Error", "Invalid user name.")
 
 
 if __name__ == '__main__':
