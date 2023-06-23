@@ -198,6 +198,7 @@ class Window(QMainWindow):
                     QMessageBox.information(self, "User Added", "New user added successfully.")
 
                     self.train_model.train()
+                    self.settings_tray.refresh_settings_window()
                 else:
                     QMessageBox.warning(self, "Error", "User already exists.")
         else:
