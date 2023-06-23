@@ -102,8 +102,5 @@ class TrainModel:
                     del self.known_encodings[index]
         print(self.known_names, len(self.known_encodings))
 
-        # index = self.known_names.index(name)
-        # del self.known_names[index]
-        # del self.known_encodings[index]
         self.save_encodings()
         self.load_encodings()

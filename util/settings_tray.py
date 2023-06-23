@@ -1,19 +1,18 @@
 import os
 import shutil
 
-from PyQt5.QtCore import Qt, QDir, pyqtSignal
+from PyQt5.QtCore import Qt, QDir
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import (
     QScrollArea, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QFrame,
     QCheckBox, QPushButton, QSpacerItem, QSizePolicy, QLineEdit, QInputDialog, QMessageBox
 )
 
+from util.train_thread import TrainThread
 from widgets.IconPushButton import IconPushButton
 
 
 class SettingsTray(QFrame):
-    name_changed = pyqtSignal(str, str)
-
     def __init__(self, train_model):
         super().__init__()
         self.setWindowTitle("Settings")
@@ -45,15 +44,30 @@ class SettingsTray(QFrame):
 
         layout.addWidget(self.scroll_area)
 
-        # Add Close button
+        # Add Close and Retrain buttons
         button_layout = QHBoxLayout()
         button_layout.addItem(QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Preferred))
-        close_button_width = 80
-        close_button = QPushButton("Close")
-        close_button.setFixedWidth(close_button_width)
-        close_button.clicked.connect(self.hide)
-        button_layout.addWidget(close_button)
+
+        self.retrain_button = QPushButton("Retrain Model")
+        self.retrain_button.setFixedWidth(160)
+        self.retrain_button.clicked.connect(self.retrain_model)
+        button_layout.addWidget(self.retrain_button)
+
+        self.close_button = QPushButton("Close")
+        self.close_button.setFixedWidth(80)
+        self.close_button.clicked.connect(self.hide)
+        button_layout.addWidget(self.close_button)
+
         layout.addLayout(button_layout)
+
+        # Create a train thread instance
+        self.train_thread = TrainThread(train_model)
+        self.train_thread.training_finished.connect(self.training_finished)
+
+        # Create the label for retraining status
+        self.status_label = QLabel("")
+
+        layout.addWidget(self.status_label)
 
         self.setLayout(layout)
 
@@ -84,6 +98,26 @@ class SettingsTray(QFrame):
 
             self.train_model.delete_user(user["name"])
             self.refresh_settings_window()
+
+    def retrain_model(self):
+        # Disable the retrain button
+        self.retrain_button.setEnabled(False)
+
+        # Show "re-training model..." message
+        self.status_label.setText("Re-training model...")
+
+        # Start the train thread
+        self.train_thread.start()
+
+    def training_finished(self):
+        # Enable the retrain button
+        self.retrain_button.setEnabled(True)
+
+        # Show training finished message
+        self.status_label.setText("Training finished.")
+
+        # Refresh the settings window
+        self.refresh_settings_window()
 
     def refresh_settings_window(self):
         # Clear the existing layout
