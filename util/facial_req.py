@@ -125,6 +125,9 @@ class FacialRecognition(QThread):
 
             print(f"{datetime.now()} - door unlocked for {name}")
 
+    def button_unlock(self):
+        self.unlock_door("admin")
+
     def get_frame_image(self):
         if self.frame is not None:
             frame_rgb = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
@@ -229,7 +232,7 @@ class FacialRecognition(QThread):
             self.BUTTON_DOOR.when_pressed = self.door_open
             self.BUTTON_DOOR.when_released = self.door_closed
             self.BUTTON_BELL.when_released = self.bell_on
-            self.BUTTON_UNLOCK.when_released = self.unlock_door("admin")
+            self.BUTTON_UNLOCK.when_released = self.button_unlock
 
             # conditions to indicate door open for too long
             if not self.last_open is None:
