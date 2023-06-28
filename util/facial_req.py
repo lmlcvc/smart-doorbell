@@ -71,6 +71,10 @@ class FacialRecognition(QThread):
         self.last_bell = None
         self.last_unlock = None
 
+        self.LED_R.on()
+        self.LED_Y.off()
+        self.LED_G.off()
+
     def set_bell(self, value, user="system"):
         self.BELL_PRESSED = value
         print(f"{datetime.now()} - {user} set bell to {value}")
@@ -119,11 +123,10 @@ class FacialRecognition(QThread):
         if self.DOOR_UNLOCKED:
             return
         if self.BELL_PRESSED:
-            self.LED_R.off()
-            self.LED_Y.off()
-
             self.bell_off()
 
+        self.LED_R.off()
+        self.LED_Y.off()
         self.DOOR_UNLOCKED = True
         self.LED_G.on()
         self.last_unlock = datetime.now()
