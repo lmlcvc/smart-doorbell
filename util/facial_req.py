@@ -229,7 +229,7 @@ class FacialRecognition(QThread):
             self.BUTTON_DOOR.when_pressed = self.door_open
             self.BUTTON_DOOR.when_released = self.door_closed
             self.BUTTON_BELL.when_released = self.bell_on
-            self.BUTTON_UNLOCK.when_released = self.unlock_door
+            self.BUTTON_UNLOCK.when_released = self.unlock_door("admin")
 
             # conditions to indicate door open for too long
             if not self.last_open is None:
