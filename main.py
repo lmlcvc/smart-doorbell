@@ -22,11 +22,6 @@ class Window(QMainWindow):
         self.setWindowTitle("Smart doorbell")
         self.setGeometry(0, 0, 800, 480)
 
-        # Main menu bar
-        self.menu = self.menuBar()
-        self.menu_file = self.menu.addMenu("File")
-        self.menu_about = self.menu.addMenu("&About")
-
         # Create a label for the display camera
         self.label = QLabel(self)
         self.label.setFixedSize(420, 420)
@@ -116,6 +111,7 @@ class Window(QMainWindow):
 
     def kill_thread(self):
         print("Finishing thread")
+        self.facial_recognition.status = False
         self.facial_recognition.finish_thread = True
         self.button1.setEnabled(True)
         self.button2.setEnabled(False)
