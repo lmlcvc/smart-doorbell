@@ -1,4 +1,6 @@
+.idea
 bin
 lib
 dataset
-pyenv.cfg
+pyvenv.cfg
+encodings.pickle
