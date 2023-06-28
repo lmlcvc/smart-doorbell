@@ -103,6 +103,9 @@ class FacialRecognition(QThread):
             print(f"{datetime.now()} - cannot open locked door")
 
     def lock_door(self):
+        if not self.DOOR_UNLOCKED:
+            return
+
         self.LED_R.on()
         self.LED_Y.off()
         self.LED_G.off()
@@ -113,17 +116,19 @@ class FacialRecognition(QThread):
         print(f"{datetime.now()} - door locked")
 
     def unlock_door(self, name):
+        if self.DOOR_UNLOCKED:
+            return
         if self.BELL_PRESSED:
             self.LED_R.off()
             self.LED_Y.off()
-            self.LED_G.on()
 
             self.bell_off()
 
-            self.DOOR_UNLOCKED = True
-            self.last_unlock = datetime.now()
+        self.DOOR_UNLOCKED = True
+        self.LED_G.on()
+        self.last_unlock = datetime.now()
 
-            print(f"{datetime.now()} - door unlocked for {name}")
+        print(f"{datetime.now()} - door unlocked for {name}")
 
     def button_unlock(self):
         self.unlock_door("admin")
