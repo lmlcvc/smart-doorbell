@@ -76,6 +76,8 @@ class TrainModel:
                 known_encodings.append(encoding)
                 known_names.append(name)
 
+        self.known_encodings = known_encodings
+        self.known_names = known_names
         # Dump the facial encodings + names to disk
         print("[INFO] Serializing encodings...")
         self.save_encodings()
