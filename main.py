@@ -24,11 +24,12 @@ class Window(QMainWindow):
 
         # Create a label for the display camera
         self.camera_feed = QLabel(self)
-        self.camera_feed.setFixedSize(420, 360)
+        self.camera_feed.setFixedSize(420, 315)
 
         # Create a label for door open warning
         self.warning_label = QLabel(self)
         self.warning_label.setText("")
+        self.warning_label.setStyleSheet("color: red")
 
         self.button_settings = IconPushButton("settings", "settings")
         self.button_unlock = IconPushButton("unlock", "unlock")
