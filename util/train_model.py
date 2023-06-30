@@ -5,7 +5,7 @@ import cv2
 import face_recognition
 from imutils import paths
 
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import QObject, pyqtSignal
 
 
 def get_users():
@@ -20,7 +20,7 @@ def get_users():
     return users
 
 
-class TrainModel:
+class TrainModel(QObject):
     training_update = pyqtSignal()
     def __init__(self):
         self.dataset_path = "dataset"
