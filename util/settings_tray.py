@@ -63,7 +63,6 @@ class SettingsTray(QFrame):
 
         # Create a train thread instance
         self.train_thread = TrainThread(train_model)
-        self.train_thread.train_model.training_update.connect(self.training_progress)
         self.train_thread.training_finished.connect(self.training_finished)
 
         # Create the label for retraining status

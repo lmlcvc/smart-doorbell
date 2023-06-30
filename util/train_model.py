@@ -5,8 +5,6 @@ import cv2
 import face_recognition
 from imutils import paths
 
-from PyQt5.QtCore import QObject, pyqtSignal
-
 
 def get_users():
     users = []
@@ -20,8 +18,7 @@ def get_users():
     return users
 
 
-class TrainModel(QObject):
-    training_update = pyqtSignal()
+class TrainModel:
     def __init__(self):
         self.dataset_path = "dataset"
         self.model_path = "haarcascade_frontalface_default.xml"
@@ -59,7 +56,6 @@ class TrainModel(QObject):
         for (i, image_path) in enumerate(image_paths):
             # Extract the person name from the image path
             print("[INFO] Processing image {}/{}".format(i + 1, len(image_paths)))
-            self.training_update.emit(round((i + 1) * 100 / len(image_paths)))
             name = image_path.split(os.path.sep)[-2]
 
             # Load the input image and convert it from RGB (OpenCV ordering)
