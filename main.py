@@ -181,7 +181,6 @@ class Window(QMainWindow):
                 else:
                     self.retrain_label.show()  # Show the re-training model label
                     self.train_thread.start()  # Start the train thread
-                    self.settings_tray.refresh_settings_window()
         else:
             # Stop the timer if the desired number of images has been captured
             self.capture_timer.stop()
@@ -213,7 +212,6 @@ class Window(QMainWindow):
 
                     self.retrain_label.show()  # Show the re-training model label
                     self.train_thread.start()  # Start the train thread
-                    self.settings_tray.refresh_settings_window()
                 else:
                     QMessageBox.warning(self, "Error", "User already exists.")
         else:
