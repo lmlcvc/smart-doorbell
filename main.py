@@ -24,7 +24,7 @@ class Window(QMainWindow):
 
         # Create a label for the display camera
         self.camera_feed = QLabel(self)
-        self.camera_feed.setFixedSize(420, 420)
+        self.camera_feed.setFixedSize(420, 360)
 
         # Create a label for door open warning
         self.warning_label = QLabel(self)
@@ -43,6 +43,7 @@ class Window(QMainWindow):
         [extra_buttons_layout.addWidget(button, alignment=Qt.AlignCenter) for button in extra_buttons]
 
         feed_layout = QVBoxLayout()
+        feed_layout.setAlignment(Qt.AlignTop)
         feed_layout.addWidget(self.camera_feed)
         feed_layout.addWidget(self.warning_label, alignment=Qt.AlignCenter)
 

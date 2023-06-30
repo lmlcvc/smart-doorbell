@@ -98,6 +98,7 @@ class FacialRecognition(QThread):
             self.lock_door()
             self.last_open = None
             print(f"{datetime.now()} - door is closed")
+        self.update_warning.emit(False)
 
     def door_open(self):
         if self.DOOR_UNLOCKED:
@@ -249,8 +250,6 @@ class FacialRecognition(QThread):
                 if time_diff.total_seconds() >= self.WAIT_SECONDS_OPEN:
                     print("JESI NA BRODU ROĐEN ZATVARAJ VRATA ALO")
                     self.update_warning.emit(True)
-                else:
-                    self.update_warning.emit(False)
 
             # conditions to indicate door re-lock
             if self.DOOR_UNLOCKED and not self.last_unlock is None and not self.DOOR_OPENED:
