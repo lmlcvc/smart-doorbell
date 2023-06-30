@@ -23,8 +23,12 @@ class Window(QMainWindow):
         self.setGeometry(0, 0, 800, 480)
 
         # Create a label for the display camera
-        self.label = QLabel(self)
-        self.label.setFixedSize(420, 420)
+        self.camera_feed = QLabel(self)
+        self.camera_feed.setFixedSize(420, 420)
+
+        # Create a label for door open warning
+        self.warning_label = QLabel(self)
+        self.warning_label.setText("")
 
         self.button_settings = IconPushButton("settings", "settings")
         self.button_unlock = IconPushButton("unlock", "unlock")
@@ -38,8 +42,12 @@ class Window(QMainWindow):
         extra_buttons_layout = QVBoxLayout()
         [extra_buttons_layout.addWidget(button, alignment=Qt.AlignCenter) for button in extra_buttons]
 
+        feed_layout = QVBoxLayout()
+        feed_layout.addWidget(self.camera_feed)
+        feed_layout.addWidget(self.warning_label, alignment=Qt.AlignCenter)
+
         top_layout = QHBoxLayout()
-        top_layout.addWidget(self.label)
+        top_layout.addLayout(feed_layout)
         top_layout.addLayout(extra_buttons_layout)
 
         # Re-training model label
@@ -52,6 +60,7 @@ class Window(QMainWindow):
         self.facial_recognition = FacialRecognition(self)
         self.facial_recognition.finished.connect(self.close)
         self.facial_recognition.update_frame.connect(self.set_image)
+        self.facial_recognition.update_warning.connect(self.set_label)
 
         # Model
         self.train_model = TrainModel()
@@ -122,7 +131,13 @@ class Window(QMainWindow):
         self.button2.setEnabled(True)
 
     def set_image(self, image):
-        self.label.setPixmap(QPixmap.fromImage(image))
+        self.camera_feed.setPixmap(QPixmap.fromImage(image))
+
+    def set_warning(self, status):
+        if status is True:
+            self.warning_label.setText("Door is still open!")
+        else:
+            self.warning_label.setText("")
 
     def save_user(self):
         self.capture_images = []  # Reset the captured images list

@@ -18,6 +18,7 @@ from datetime import datetime
 
 class FacialRecognition(QThread):
     update_frame = pyqtSignal(QImage)
+    update_warning = pyqtSignal(bool)
 
     def __init__(self, parent=None):
         QThread.__init__(self, parent)
@@ -247,6 +248,9 @@ class FacialRecognition(QThread):
                 time_diff = datetime.now() - self.last_open
                 if time_diff.total_seconds() >= self.WAIT_SECONDS_OPEN:
                     print("JESI NA BRODU ROĐEN ZATVARAJ VRATA ALO")
+                    self.update_warning.emit(True)
+                else:
+                    self.update_warning.emit(False)
 
             # conditions to indicate door re-lock
             if self.DOOR_UNLOCKED and not self.last_unlock is None and not self.DOOR_OPENED:
