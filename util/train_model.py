@@ -19,6 +19,7 @@ def get_users():
 
 
 class TrainModel:
+    training_update = pyqtSignal()
     def __init__(self):
         self.dataset_path = "dataset"
         self.model_path = "haarcascade_frontalface_default.xml"
@@ -56,6 +57,7 @@ class TrainModel:
         for (i, image_path) in enumerate(image_paths):
             # Extract the person name from the image path
             print("[INFO] Processing image {}/{}".format(i + 1, len(image_paths)))
+            self.training_update.emit(round((i + 1) * 100 / len(image_paths)))
             name = image_path.split(os.path.sep)[-2]
 
             # Load the input image and convert it from RGB (OpenCV ordering)

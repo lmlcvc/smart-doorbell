@@ -27,9 +27,10 @@ class SettingsTray(QFrame):
         # Create the main layout
         layout = QVBoxLayout()
 
-        # Add email notifications checkbox
-        self.email_checkbox = QCheckBox("Enable Email Notifications")
-        layout.addWidget(self.email_checkbox)
+        # TODO: Implement mailing API
+        # # Add email notifications checkbox
+        # self.email_checkbox = QCheckBox("Enable Email Notifications")
+        # layout.addWidget(self.email_checkbox)
 
         # Add label for the list of users
         self.users_label = QLabel("List of Users:")
@@ -62,6 +63,7 @@ class SettingsTray(QFrame):
 
         # Create a train thread instance
         self.train_thread = TrainThread(train_model)
+        self.train_thread.train_model.training_update.connect(self.training_progress)
         self.train_thread.training_finished.connect(self.training_finished)
 
         # Create the label for retraining status
@@ -108,6 +110,10 @@ class SettingsTray(QFrame):
 
         # Start the train thread
         self.train_thread.start()
+
+    def training_progress(self, progress):
+        # Show training finished message
+        self.status_label.setText(f"Re-training model...{progress}%")
 
     def training_finished(self):
         # Enable the retrain button
