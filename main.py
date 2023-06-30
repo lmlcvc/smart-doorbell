@@ -180,8 +180,6 @@ class Window(QMainWindow):
                         self.capture_counter = 0  # Reset the capture counter
                 else:
                     self.retrain_label.show()  # Show the re-training model label
-                    self.train_model = TrainModel()
-                    self.train_thread = TrainThread(self.train_model)
                     self.train_thread.start()  # Start the train thread
                     self.settings_tray.refresh_settings_window()
         else:
@@ -214,8 +212,6 @@ class Window(QMainWindow):
                     QMessageBox.information(self, "User Added", "New user added successfully.")
 
                     self.retrain_label.show()  # Show the re-training model label
-                    self.train_model = TrainModel()
-                    self.train_thread = TrainThread(self.train_model)
                     self.train_thread.start()  # Start the train thread
                     self.settings_tray.refresh_settings_window()
                 else:
