@@ -60,7 +60,7 @@ class Window(QMainWindow):
         self.facial_recognition = FacialRecognition(self)
         self.facial_recognition.finished.connect(self.close)
         self.facial_recognition.update_frame.connect(self.set_image)
-        self.facial_recognition.update_warning.connect(self.set_label)
+        self.facial_recognition.update_warning.connect(self.set_warning)
 
         # Model
         self.train_model = TrainModel()
