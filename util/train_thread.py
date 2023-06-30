@@ -11,4 +11,3 @@ class TrainThread(QThread):
     def run(self):
         self.train_model.train()
         self.training_finished.emit()
-        self.terminate()
