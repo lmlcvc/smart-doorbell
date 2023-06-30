@@ -266,5 +266,4 @@ class FacialRecognition(QThread):
 
             self.process_frame()
 
-    def stop(self):
-        self.terminate()
+        sys.exit(-1)
