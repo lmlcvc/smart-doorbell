@@ -123,7 +123,7 @@ class Window(QMainWindow):
     def kill_thread(self):
         print("Finishing thread")
         self.facial_recognition.status = False
-        self.facial_recognition.finish_thread = True
+        self.facial_recognition.stop()
         self.button1.setEnabled(True)
         self.button2.setEnabled(False)
 
@@ -139,7 +139,7 @@ class Window(QMainWindow):
         if status is True:
             self.warning_label.setText("Door is still open!")
         else:
-            self.warning_label.setText("")
+            self.warning_label.setText(" ")
 
     def save_user(self):
         self.capture_images = []  # Reset the captured images list
