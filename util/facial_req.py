@@ -220,10 +220,11 @@ class FacialRecognition(QThread):
         self.frame = self.vs.read()
         self.frame = imutils.resize(self.frame, width=420)
 
-        # run facial recognition, display names if found
-        names, boxes = self.facial_recognition() or (None, None)
-        if names is not None and boxes is not None:
-            self.set_boxes(boxes, names)
+        if self.BELL_PRESSED:
+            # run facial recognition, display names if found
+            names, boxes = self.facial_recognition() or (None, None)
+            if names is not None and boxes is not None:
+                self.set_boxes(boxes, names)
 
         height, width, channel = self.frame.shape
         bytes_per_line = channel * width
