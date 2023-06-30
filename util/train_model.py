@@ -5,6 +5,8 @@ import cv2
 import face_recognition
 from imutils import paths
 
+from PyQt5.QtCore import pyqtSignal
+
 
 def get_users():
     users = []
