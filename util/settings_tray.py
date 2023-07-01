@@ -104,6 +104,8 @@ class SettingsTray(QFrame):
         # Disable the retrain button
         self.retrain_button.setEnabled(False)
 
+        self.train_thread.status = True
+
         # Show "re-training model..." message
         self.status_label.setText("Re-training model...")
 
@@ -117,6 +119,8 @@ class SettingsTray(QFrame):
     def training_finished(self):
         # Enable the retrain button
         self.retrain_button.setEnabled(True)
+
+        self.train_thread.status = False
 
         # Show training finished message
         self.status_label.setText("Training finished.")
