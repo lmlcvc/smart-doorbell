@@ -226,4 +226,8 @@ class SettingsTray(QFrame):
             widget = item.widget()
             if widget:
                 widget.setParent(None)
+                widget.hide()
+                widget.close()
                 widget.deleteLater()
+            self.scroll_layout.removeItem(item)
+            item.deleteLater()
