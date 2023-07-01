@@ -221,12 +221,9 @@ class SettingsTray(QFrame):
 
     def clear_scroll_layout(self):
         # Clear the existing layout and delete the widgets
-        scroll_layout = self.scroll_layout
-        while scroll_layout.count():
-            item = scroll_layout.takeAt(0)
+        while self.scroll_layout.count():
+            item = self.scroll_layout.takeAt(0)
             widget = item.widget()
             if widget:
                 widget.setParent(None)
                 widget.deleteLater()
-            scroll_layout.removeItem(item)
-        self.scroll_layout = scroll_layout
