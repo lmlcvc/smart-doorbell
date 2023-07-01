@@ -6,9 +6,11 @@ class TrainThread(QThread):
 
     def __init__(self, train_model):
         super().__init__()
+        self.status = False
         self.train_model = train_model
 
     def run(self):
-        self.train_model.train()
-        self.training_finished.emit()
-        self.exit()
+        if self.status:
+            self.train_model.train()
+            self.training_finished.emit()
+            self.status = False

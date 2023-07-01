@@ -56,6 +56,7 @@ class Window(QMainWindow):
         self.retrain_label = QLabel("Re-training model...", self)
         self.retrain_label.setObjectName("retrain_label")
         self.retrain_label.setAlignment(Qt.AlignCenter)
+        feed_layout.addWidget(self.retrain_label)  # Add the re-training model label to the layout
         self.retrain_label.hide()
 
         # Facial recognition
@@ -67,6 +68,7 @@ class Window(QMainWindow):
         # Model
         self.train_model = TrainModel()
         self.train_thread = TrainThread(self.train_model)
+        self.train_thread.training_finished.connect(self.training_finished)
 
         # Buttons layout
         buttons_layout = QHBoxLayout()
@@ -82,7 +84,6 @@ class Window(QMainWindow):
         layout.addLayout(top_layout)
         layout.addLayout(buttons_layout)
         layout.addStretch(1)  # Add stretchable space to push the buttons to the right
-        layout.addWidget(self.retrain_label)  # Add the re-training model label to the layout
 
         # Settings dialog
         self.settings_tray = SettingsTray(self.train_model)
@@ -147,6 +148,7 @@ class Window(QMainWindow):
         self.capture_timer.start()  # Start the timer to capture images
 
     def training_finished(self):
+        self.train_thread.status = False
         self.retrain_label.hide()  # Hide the re-training model label after training finished
 
     def capture_image(self):
