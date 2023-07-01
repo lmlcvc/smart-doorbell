@@ -180,8 +180,9 @@ class Window(QMainWindow):
 
                         self.capture_images = []  # Clear the captured images list
                         self.capture_counter = 0  # Reset the capture counter
-                        self.retrain_label.show()  # Show the re-training model label
-                        self.train_thread.start()  # Start the train thread
+                else:
+                    self.retrain_label.show()  # Show the re-training model label
+                    self.train_thread.start()  # Start the train thread
         else:
             # Stop the timer if the desired number of images has been captured
             self.capture_timer.stop()
