@@ -228,3 +228,5 @@ class SettingsTray(QFrame):
             if widget:
                 widget.setParent(None)
                 widget.deleteLater()
+            scroll_layout.removeItem(item)
+        self.scroll_layout = scroll_layout

@@ -236,6 +236,7 @@ class FacialRecognition(QThread):
             # Check if encodingsP file has been modified
             if os.path.getmtime(self.encodingsP) > self.encodings_timestamp:
                 print("[INFO] Reloading encodings...")
+                time.sleep(1.0)
                 with open(self.encodingsP, "rb") as file:
                     self.data = pickle.load(file)
                 self.encodings_timestamp = os.path.getmtime(self.encodingsP)  # Update modification timestamp
