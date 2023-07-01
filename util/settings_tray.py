@@ -226,8 +226,20 @@ class SettingsTray(QFrame):
             widget = item.widget()
             if widget:
                 widget.setParent(None)
-                widget.hide()
-                widget.close()
                 widget.deleteLater()
-            self.scroll_layout.removeItem(item)
-            item.deleteLater()
+            else:
+                layout = item.layout()
+                if layout:
+                    self.clear_layout(layout)
+
+    def clear_layout(self, layout):
+        while layout.count():
+            item = layout.takeAt(0)
+            widget = item.widget()
+            if widget:
+                widget.setParent(None)
+                widget.deleteLater()
+            else:
+                nested_layout = item.layout()
+                if nested_layout:
+                    self.clear_layout(nested_layout)
