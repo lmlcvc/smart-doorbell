@@ -176,6 +176,7 @@ class Window(QMainWindow):
                             self.settings_tray.refresh_settings_window()
                             QMessageBox.information(self, "User Saved", "New user saved successfully.")
                             self.retrain_label.show()  # Show the re-training model label
+                            self.train_thread.status = True
                             self.train_thread.start()  # Start the train thread
                         else:
                             QMessageBox.warning(self, "Error", "User already exists.")
@@ -212,6 +213,7 @@ class Window(QMainWindow):
                     QMessageBox.information(self, "User Added", "New user added successfully.")
 
                     self.retrain_label.show()  # Show the re-training model label
+                    self.train_thread.status = True
                     self.train_thread.start()  # Start the train thread
                 else:
                     QMessageBox.warning(self, "Error", "User already exists.")
