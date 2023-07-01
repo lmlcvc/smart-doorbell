@@ -120,6 +120,7 @@ class Window(QMainWindow):
             self.height() - self.settings_tray.height() - 10
         )
         self.settings_tray.setFocus(Qt.PopupFocusReason)
+        self.settings_tray.refresh_settings_window()
 
     def kill_thread(self):
         print("Finishing thread")
