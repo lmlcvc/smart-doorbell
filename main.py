@@ -34,7 +34,7 @@ class Window(QMainWindow):
         self.button_settings = IconPushButton("settings", "settings")
         self.button_unlock = IconPushButton("unlock", "unlock")
         self.button_save = IconPushButton("save", "save")
-        self.button_add_user = IconPushButton("add user", "add_user.png")
+        self.button_add_user = IconPushButton("add user", "add_user")
         self.button_silent = IconPushButton("ignore", "ignore")
         extra_buttons = [self.button_settings, self.button_unlock, self.button_save, self.button_add_user,
                          self.button_silent]
