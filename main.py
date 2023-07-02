@@ -198,7 +198,7 @@ class Window(QMainWindow):
         if ok and name:
             file_dialog = QFileDialog(self)
             file_dialog.setFileMode(QFileDialog.ExistingFiles)
-            file_dialog.setNameFilter("Images (*.jpg *.png)")
+            file_dialog.setNameFilter("Images (*.jpg *.jpeg *.png)")
             if file_dialog.exec_():
                 files = file_dialog.selectedFiles()
                 user_directory = os.path.join("dataset", name)
