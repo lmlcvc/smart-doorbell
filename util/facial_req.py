@@ -107,6 +107,9 @@ class FacialRecognition(QThread):
             print(f"{datetime.now()} - door is opened")
         else:
             print(f"{datetime.now()} - cannot open locked door")
+            
+        # reset name
+        self.currentname = "unknown"
 
     def lock_door(self):
         if not self.DOOR_UNLOCKED:
