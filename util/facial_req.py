@@ -119,6 +119,9 @@ class FacialRecognition(QThread):
         self.DOOR_UNLOCKED = False
         self.last_unlock = None  # TODO should we check both for last unlock and last open
 
+        # temporary workaround
+        self.last_bell = None
+
         print(f"{datetime.now()} - door locked")
 
     def unlock_door(self, name):
@@ -132,6 +135,8 @@ class FacialRecognition(QThread):
         self.DOOR_UNLOCKED = True
         self.LED_G.on()
         self.last_unlock = datetime.now()
+        # temporary workaround
+        self.last_bell = None
 
         print(f"{datetime.now()} - door unlocked for {name}")
 
@@ -212,6 +217,8 @@ class FacialRecognition(QThread):
 
     @pyqtSlot()
     def handle_bell_silent_signal(self):
+        # temporary workaround
+        self.last_bell = None
         if self.BELL_PRESSED:
             self.bell_off(user="admin")
 
